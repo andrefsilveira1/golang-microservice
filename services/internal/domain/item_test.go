@@ -13,6 +13,10 @@ func TestItemJSONSerialization(t *testing.T) {
 		Name:        "Test Item",
 		Description: "Description of test item",
 		Price:       9.99,
+		Categories: []*Category{
+			&Category{Name: "Category 1"},
+			&Category{Name: "category 2"},
+		},
 	}
 
 	data, err := json.Marshal(item)
