@@ -5,4 +5,5 @@ type Item struct {
 	Name		string	`json:"name"`
 	Description	string	`json:"description"`
 	Price		float64	`json:"price"`
+	Categories 	[]*Category `json:"categories"`
 }
