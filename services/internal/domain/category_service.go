@@ -2,6 +2,8 @@ package domain
 
 import ("github.com/pkg/errors")
 
+var ErrCategoryNotFound = errors.New("Category Not Found")
+
 type CategoryService struct {
 	categoryRepository CategoryRepository
 }
@@ -14,7 +16,7 @@ func NewCategoryService(repo CategoryRepository) *CategoryService {
 
 func (s *CategoryService) CreateCategory(category *Category) error {
 	if category == nil {
-		return errors.New("Category can not be null")
+		return &ValidationError{"Category can not be null"}
 	}
 
 	return s.categoryRepository.CreateCategory(category)
@@ -22,30 +24,55 @@ func (s *CategoryService) CreateCategory(category *Category) error {
 
 func (s *CategoryService) UpdateCategory(category *Category) error {
 	if category == nil {
-		return errors.New("Category can not be null")
+		return &ValidationError{"Category can not be null"}
 	}
 
-	return s.categoryRepository.UpdateCategory(category)
-}
-
-func (s *CategoryService) DeleteCategory(category uint) error {
-	if category <= 0 {
-		return errors.New("Category ID can not be null")
+	err := s.categoryRepository.UpdateCategory(category)
+	if err != nil {
+		return errors.Wrap(err, "Unable to update the category")
 	}
 
-	return s.categoryRepository.DeleteCategory(category)
+	return nil
 }
 
-func (s *CategoryService) FindCategoryById(category uint)  (*Category, error) {
-	if category <= 0 {
-		return nil, errors.New("Category can not be null")
+func (s *CategoryService) DeleteCategory(categoryID uint) error {
+	if categoryID <= 0 {
+		return &ValidationError{"Invalid category ID"}
 	}
 
-	return s.categoryRepository.FindCategoryById(category)
+	err := s.categoryRepository.DeleteCategory(categoryID)
+	if err != nil {
+		if err == ErrCategoryNotFound {
+			return ErrCategoryNotFound
+		}
+		return errors.Wrap(err, "Error to delete the category")
+	}
+
+	return nil
 }
 
-func (s *CategoryService) ListCategories()  ([]*Category, error) {
-	return s.categoryRepository.ListCategories()
+func (s *CategoryService) FindCategoryByID(categoryID uint) (*Category, error) {
+	if categoryID <= 0 {
+		return nil, &ValidationError{"Invalid category ID"}
+	}
+
+	category, err := s.categoryRepository.FindCategoryById(categoryID)
+	if err != nil {
+		if err == ErrCategoryNotFound {
+			return nil, ErrCategoryNotFound
+		}
+		return nil, errors.Wrap(err, "Error to find the category")
+	}
+
+	return category, nil
 }
 
+func (s *CategoryService) ListCategories() ([]*Category, error) {
+	categories, err := s.categoryRepository.ListCategories()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error to list the categories")
+	}
+
+	return categories, nil
+}
 
