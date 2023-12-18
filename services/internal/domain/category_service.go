@@ -28,3 +28,24 @@ func (s *CategoryService) UpdateCategory(category *Category) error {
 	return s.categoryRepository.UpdateCategory(category)
 }
 
+func (s *CategoryService) DeleteCategory(category uint) error {
+	if category <= 0 {
+		return errors.New("Category ID can not be null")
+	}
+
+	return s.categoryRepository.DeleteCategory(category)
+}
+
+func (s *CategoryService) FindCategoryById(category uint)  (*Category, error) {
+	if category <= 0 {
+		return nil, errors.New("Category can not be null")
+	}
+
+	return s.categoryRepository.FindCategoryById(category)
+}
+
+func (s *CategoryService) ListCategories()  ([]*Category, error) {
+	return s.categoryRepository.ListCategories()
+}
+
+
