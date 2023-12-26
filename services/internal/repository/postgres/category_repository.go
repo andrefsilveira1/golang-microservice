@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"github.com/jmoiron/sqlx"
+
+	"log"
 )
 
 const (
@@ -11,6 +13,11 @@ const (
 	listCategory   = "list category"
 	updateCategory = "update category by id"
 )
+
+type CategoryRepository struct {
+	DB	*sqlx.DB
+	statements map[string]*sqlx.Stmt
+}
 
 func queriesCategory() map[string]string {
 	return map[string]string{
@@ -22,8 +29,26 @@ func queriesCategory() map[string]string {
 	}
 }
 
-type CategoryRepository struct {
-	DB	*sqlx.DB
-	statements map[string]*sqlx.Stmt
-}
+func NewCategoryRepository (db *sqlx.DB) *CategoryRepository {
+	statements := make(map[string]*sqlx.Stmt)
 
+	var errors []error
+	for queryName, query := range queriesCategory() {
+		stmt, err := db.Preparex(query)
+		if err != nil {
+			log.Printf("Errror preparing statement %s: %v", queryName, err)
+			errors = append(errors, err)
+		}
+		statements[queryName] = stmt
+	}
+
+	if len(errors) > 0 {
+		log.Fatalf("Category repository was not able to build all the statements")
+		return nil
+	}
+
+	return &CategoryRepository {
+		DB:	db,
+		statements: statements,
+	}
+}
