@@ -1,8 +1,7 @@
 package postgres
 
-
 import (
-	"fmt"
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -22,3 +21,9 @@ func queriesCategory() map[string]string {
 		updateCategory: `UPDATE categories SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
 	}
 }
+
+type CategoryRepository struct {
+	DB	*sqlx.DB
+	statements map[string]*sqlx.Stmt
+}
+
