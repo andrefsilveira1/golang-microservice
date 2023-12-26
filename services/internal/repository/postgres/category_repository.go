@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"github.com/jmoiron/sqlx"
-
+	"fmt"
 	"log"
 )
 
@@ -51,4 +51,13 @@ func NewCategoryRepository (db *sqlx.DB) *CategoryRepository {
 		DB:	db,
 		statements: statements,
 	}
+}
+
+func (r *CategoryRepository) statement(query string) (*sqlx.Stmt, error) {
+	stmt, ready := r.statements[query]
+	if !ready {
+		return nil, fmt.Errorf("Prepared statement '%s' not found", query)
+	}
+
+	return stmt, nil
 }
