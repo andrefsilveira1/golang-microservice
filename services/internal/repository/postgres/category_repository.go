@@ -61,3 +61,21 @@ func (r *CategoryRepository) statement(query string) (*sqlx.Stmt, error) {
 
 	return stmt, nil
 }
+
+func (r *CategoryRepository) Create(category *domain.Category) error {
+	stmt, err := r.statement(createCategory)
+	if err != nil {
+		return err
+	}
+	
+	if err := stmt.Get(category, category.Name); err != nil {
+		if isUniqueViolationError(err) {
+			return fmt.Errorf("Category with name '%s' already exists", category.Name)
+		}
+		return fmt.Errorf("Error creating category: %v", err)
+	}
+
+	return nil
+}
+
+
