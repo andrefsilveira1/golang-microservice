@@ -132,3 +132,17 @@ func (r *CategoryRepository) Get(categoryId int) (*domain.Category, error) {
 	return category, nil
 
 }
+
+func (r *CategoryRepository) List() ([]*domain.Category, error) {
+	stmt, err := r.statement(listCategory)
+	if err != nil {
+		return nil, err
+	}
+
+	var categories []*domain.Category
+	if err := stmt.Select(&categories); err != nil {
+		return nil, fmt.Errorf("Error getting categories")
+	}
+
+	return categories, nil
+}
