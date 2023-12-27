@@ -42,4 +42,14 @@ func NewItemRepository(db *sqlx.DB) *ItemRepository {
 
 		sqlStatements[queryName] = stmt
 	}
+
+	if len(errs) > 0 {
+		log.Fatalf("Item repository was not able to build all the statements")
+		return nil
+	}
+
+	return &ItemRepository{
+		DB:         db,
+		statements: sqlStatements,
+	}
 }
