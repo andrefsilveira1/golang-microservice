@@ -105,3 +105,15 @@ func (r *CategoryRepository) Update(category *domain.Category) error {
 
 	return nil
 }
+
+func (r *CategoryRepository) Delete(categoryId int) error {
+	stmt, err := r.statement(deleteCategory)
+	if err != nil {
+		return err
+	}
+
+	if _, err := stmt.Exec(categoryId); err != nil {
+		return fmt.Errorf("Error deleting category with id '%d' ", categoryId)
+	}
+	return nil
+}
