@@ -1,6 +1,10 @@
 package postgres
 
-import "github.com/jmoiron/sqlx"
+import (
+	"log"
+
+	"github.com/jmoiron/sqlx"
+)
 
 const (
 	createItem = "create item"
@@ -22,5 +26,20 @@ func queriesItem() map[string]string {
 		getItem:    `SELECT * FROM items WHERE id = $1`,
 		listItem:   `SELECT * FROM items WHERE deleted_at IS NULL ORDER BY name ASC`,
 		updateItem: `UPDATE items SET name = $1, description = $2, price = $3, updated_at = NOW() WHERE id = $4 RETURNING *`,
+	}
+}
+
+func NewItemRepository(db *sqlx.DB) *ItemRepository {
+	sqlStatements := make(map[string]*sqlx.Stmt)
+
+	var errs []error
+	for queryName, query := range queriesItem() {
+		stmt, err := db.Preparex(query)
+		if err != nil {
+			log.Printf("Error preparing statement %s: %v", queryName, err)
+			errs = append(errs, err)
+		}
+
+		sqlStatements[queryName] = stmt
 	}
 }
