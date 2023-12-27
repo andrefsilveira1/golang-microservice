@@ -117,3 +117,18 @@ func (r *CategoryRepository) Delete(categoryId int) error {
 	}
 	return nil
 }
+
+func (r *CategoryRepository) Get(categoryId int) (*domain.Category, error) {
+	stmt, err := r.statement(getCategory)
+	if err != nil {
+		return nil, err
+	}
+
+	category := &domain.Category{}
+	if err := stmt.Get(category, categoryId); err != nil {
+		return nil, fmt.Errorf("Error getting the category with id '%d'", categoryId)
+	}
+
+	return category, nil
+
+}
