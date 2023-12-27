@@ -1,5 +1,7 @@
 package postgres
 
+import "github.com/jmoiron/sqlx"
+
 const (
 	createItem = "create item"
 	deleteItem = "delete item by id"
@@ -7,6 +9,11 @@ const (
 	listItem   = "list item"
 	updateItem = "update item by id"
 )
+
+type ItemRepository struct {
+	DB         *sqlx.DB
+	statements map[string]*sqlx.Stmt
+}
 
 func queriesItem() map[string]string {
 	return map[string]string{
