@@ -1,9 +1,12 @@
 package postgres
 
 import (
-	"github.com/jmoiron/sqlx"
 	"fmt"
 	"log"
+	"microservices/services/internal/domain"
+	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -15,7 +18,7 @@ const (
 )
 
 type CategoryRepository struct {
-	DB	*sqlx.DB
+	DB         *sqlx.DB
 	statements map[string]*sqlx.Stmt
 }
 
@@ -29,7 +32,7 @@ func queriesCategory() map[string]string {
 	}
 }
 
-func NewCategoryRepository (db *sqlx.DB) *CategoryRepository {
+func NewCategoryRepository(db *sqlx.DB) *CategoryRepository {
 	statements := make(map[string]*sqlx.Stmt)
 
 	var errors []error
@@ -47,8 +50,8 @@ func NewCategoryRepository (db *sqlx.DB) *CategoryRepository {
 		return nil
 	}
 
-	return &CategoryRepository {
-		DB:	db,
+	return &CategoryRepository{
+		DB:         db,
 		statements: statements,
 	}
 }
@@ -67,7 +70,7 @@ func (r *CategoryRepository) Create(category *domain.Category) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if err := stmt.Get(category, category.Name); err != nil {
 		if isUniqueViolationError(err) {
 			return fmt.Errorf("Category with name '%s' already exists", category.Name)
@@ -78,4 +81,27 @@ func (r *CategoryRepository) Create(category *domain.Category) error {
 	return nil
 }
 
+func (r *CategoryRepository) Update(category *domain.Category) error {
+	stmt, err := r.statement(updateCategory)
+	if err != nil {
+		return err
+	}
 
+	category.updated_at = time.Now()
+
+	params := []interface{}{
+		category.Name,
+		category.Id,
+	}
+
+	if err := stmt.Get(category, params...); err != nil {
+		// TO implement
+		if isUniqueViolationError(err) {
+			return fmt.Errorf("Category with name '%s' already exists", category.Name)
+		}
+
+		return fmt.Errorf("Error updating category")
+	}
+
+	return nil
+}
