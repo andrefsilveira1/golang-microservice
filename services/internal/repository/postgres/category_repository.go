@@ -1,9 +1,12 @@
 package postgres
 
 import (
-	"github.com/jmoiron/sqlx"
 	"fmt"
 	"log"
+	"microservices/services/internal/domain"
+	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -15,7 +18,7 @@ const (
 )
 
 type CategoryRepository struct {
-	DB	*sqlx.DB
+	DB         *sqlx.DB
 	statements map[string]*sqlx.Stmt
 }
 
@@ -29,7 +32,7 @@ func queriesCategory() map[string]string {
 	}
 }
 
-func NewCategoryRepository (db *sqlx.DB) *CategoryRepository {
+func NewCategoryRepository(db *sqlx.DB) *CategoryRepository {
 	statements := make(map[string]*sqlx.Stmt)
 
 	var errors []error
@@ -47,8 +50,8 @@ func NewCategoryRepository (db *sqlx.DB) *CategoryRepository {
 		return nil
 	}
 
-	return &CategoryRepository {
-		DB:	db,
+	return &CategoryRepository{
+		DB:         db,
 		statements: statements,
 	}
 }
@@ -60,4 +63,86 @@ func (r *CategoryRepository) statement(query string) (*sqlx.Stmt, error) {
 	}
 
 	return stmt, nil
+}
+
+func (r *CategoryRepository) Create(category *domain.Category) error {
+	stmt, err := r.statement(createCategory)
+	if err != nil {
+		return err
+	}
+
+	if err := stmt.Get(category, category.Name); err != nil {
+		if isUniqueViolationError(err) {
+			return fmt.Errorf("Category with name '%s' already exists", category.Name)
+		}
+		return fmt.Errorf("Error creating category: %v", err)
+	}
+
+	return nil
+}
+
+func (r *CategoryRepository) Update(category *domain.Category) error {
+	stmt, err := r.statement(updateCategory)
+	if err != nil {
+		return err
+	}
+
+	category.updated_at = time.Now()
+
+	params := []interface{}{
+		category.Name,
+		category.Id,
+	}
+
+	if err := stmt.Get(category, params...); err != nil {
+		// TO implement
+		if isUniqueViolationError(err) {
+			return fmt.Errorf("Category with name '%s' already exists", category.Name)
+		}
+
+		return fmt.Errorf("Error updating category")
+	}
+
+	return nil
+}
+
+func (r *CategoryRepository) Delete(categoryId int) error {
+	stmt, err := r.statement(deleteCategory)
+	if err != nil {
+		return err
+	}
+
+	if _, err := stmt.Exec(categoryId); err != nil {
+		return fmt.Errorf("Error deleting category with id '%d' ", categoryId)
+	}
+	return nil
+}
+
+func (r *CategoryRepository) Get(categoryId int) (*domain.Category, error) {
+	stmt, err := r.statement(getCategory)
+	if err != nil {
+		return nil, err
+	}
+
+	category := &domain.Category{}
+	if err := stmt.Get(category, categoryId); err != nil {
+		return nil, fmt.Errorf("Error getting the category with id '%d'", categoryId)
+	}
+
+	return category, nil
+
+}
+
+func (r *CategoryRepository) List() ([]*domain.Category, error) {
+	stmt, err := r.statement(listCategory)
+	if err != nil {
+		return nil, err
+	}
+
+	var categories []*domain.Category
+	if err := stmt.Select(&categories); err != nil {
+		return nil, fmt.Errorf("Error getting categories")
+	}
+
+	return categories, nil
 }
