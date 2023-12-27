@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -52,4 +53,13 @@ func NewItemRepository(db *sqlx.DB) *ItemRepository {
 		DB:         db,
 		statements: sqlStatements,
 	}
+}
+
+func (r *ItemRepository) statement(query string) (*sqlx.Stmt, error) {
+	stmt, ready := r.statements[query]
+	if !ready {
+		return nil, fmt.Errorf("Prepared statement '%s' not found", query)
+	}
+
+	return stmt, nil
 }
