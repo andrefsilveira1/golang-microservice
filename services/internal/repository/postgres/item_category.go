@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"log"
+	"microservices/services/internal/domain"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -62,4 +63,17 @@ func (r *ItemRepository) statement(query string) (*sqlx.Stmt, error) {
 	}
 
 	return stmt, nil
+}
+
+func (r *ItemRepository) Create(item *domain.Item) error {
+	stmt, err := r.statement(createItem)
+	if err != nil {
+		return err
+	}
+
+	if err := stmt.Get(item, item.name, item.description, item.price); err != nil {
+		return fmt.Errorf("Error while creating new item: %v", err)
+	}
+
+	return nil
 }
