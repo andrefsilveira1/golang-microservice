@@ -100,3 +100,16 @@ func (r *ItemRepository) Update(item *domain.Item) error {
 
 	return nil
 }
+
+func (r *ItemRepository) Delete(itemId int) error {
+	stmt, err := r.statement(deleteItem)
+	if err != nil {
+		return err
+	}
+
+	if _, err := stmt.Exec(itemId); err != nil {
+		return fmt.Errorf("Error deleting item with id '%d'", itemId)
+	}
+
+	return nil
+}
