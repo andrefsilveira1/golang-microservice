@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"microservices/services/internal/domain"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -73,6 +74,28 @@ func (r *ItemRepository) Create(item *domain.Item) error {
 
 	if err := stmt.Get(item, item.name, item.description, item.price); err != nil {
 		return fmt.Errorf("Error while creating new item: %v", err)
+	}
+
+	return nil
+}
+
+func (r *ItemRepository) Update(item *domain.Item) error {
+	stmt, err := r.statement(updateItem)
+	if err != nil {
+		return err
+	}
+
+	item.updated_at = time.Now()
+
+	params := []interface{}{
+		item.Name,
+		item.Description,
+		item.Price,
+		item.Id,
+	}
+
+	if err := stmt.Get(item, params...); err != nil {
+		return fmt.Errorf("Error until update process")
 	}
 
 	return nil
