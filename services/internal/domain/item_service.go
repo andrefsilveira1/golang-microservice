@@ -43,3 +43,55 @@ func (s *ItemService) Create(item *Item) error {
 
 	return nil
 }
+
+func (s *ItemService) Update(item *Item) error {
+	if item == nil {
+		return ErrItemIsNull
+	}
+
+	err := s.itemRepository.Update(item)
+	if err != nil {
+		return errros.Wrap(err, "Unable to update item")
+	}
+
+	return nil
+}
+
+func (s *ItemService) Delete(itemId int ) error {
+	if itemId <= 0 {
+		return ErrItemIdINvalid
+	}
+
+	err := s.itemRepository.Delete(itemId)
+	if err != nil {
+		if errors.Is(err, ErrItemNotFOund) {
+			return ErrItemNotFOund
+		}
+		return errors.Wrap(err, "Error to delete item")
+	}
+	return nil
+}
+
+func (s *ItemService) Get (itemId int) (*Item, error) {
+	if itemId <= 0 {
+		return nil, ErrItemIdINvalid
+	}
+
+	item, err := s.ItemRepository.Get(itemId)
+	if err != nil {
+		if errors.Is(err, ErrItemNotFOund) {
+			return nil, ErrItemNotFOund
+		}
+		return nil, errors.Wrap(err, "Error to find the item")
+	}
+	return item, nil
+}
+
+func (s *ItemService) List() ([]*Item, error) {
+	items, err := s.itemRepository.List()
+	if err != nil {
+		return nil, errors.Wrap(err, "Error to list items")
+	}
+
+	return items, nil
+}
