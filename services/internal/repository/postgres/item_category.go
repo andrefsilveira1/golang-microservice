@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"microservices/services/internal/domain"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -76,4 +77,67 @@ func (r *ItemRepository) Create(item *domain.Item) error {
 	}
 
 	return nil
+}
+
+func (r *ItemRepository) Update(item *domain.Item) error {
+	stmt, err := r.statement(updateItem)
+	if err != nil {
+		return err
+	}
+
+	item.updated_at = time.Now()
+
+	params := []interface{}{
+		item.Name,
+		item.Description,
+		item.Price,
+		item.Id,
+	}
+
+	if err := stmt.Get(item, params...); err != nil {
+		return fmt.Errorf("Error until update process")
+	}
+
+	return nil
+}
+
+func (r *ItemRepository) Delete(itemId int) error {
+	stmt, err := r.statement(deleteItem)
+	if err != nil {
+		return err
+	}
+
+	if _, err := stmt.Exec(itemId); err != nil {
+		return fmt.Errorf("Error deleting item with id '%d'", itemId)
+	}
+
+	return nil
+}
+
+func (r *ItemRepository) Get(itemId int) (*domain.Item, error) {
+	stmt, err := r.statement(getItem)
+	if err != nil {
+		return nil, err
+	}
+
+	item := &domain.Item{}
+	if err := stmt.Get(item, itemId); err != nil {
+		return nil, fmt.Errorf("Error getting the item with id '%d' ", itemId)
+	}
+
+	return item, nil
+}
+
+func (r *ItemRepository) List() ([]*domain.Item, error) {
+	stmt, err := r.statement(listItem)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []*domain.Item
+	if err := stmt.Select(&items); err != nil {
+		return nil, fmt.Errorf("Error listing items")
+	}
+
+	return items, nil
 }
