@@ -1,6 +1,8 @@
 package domain
 
-import ("github.com/pkg/errors")
+import (
+	"github.com/pkg/errors"
+)
 
 var ErrCategoryNotFound = errors.New("Category Not Found")
 
@@ -9,7 +11,7 @@ type CategoryService struct {
 }
 
 func NewCategoryService(repo CategoryRepository) *CategoryService {
-	return &CategoryService {
+	return &CategoryService{
 		categoryRepository: repo,
 	}
 }
@@ -56,7 +58,7 @@ func (s *CategoryService) FindCategoryByID(categoryID uint) (*Category, error) {
 		return nil, &ValidationError{"Invalid category ID"}
 	}
 
-	category, err := s.categoryRepository.FindCategoryById(categoryID)
+	category, err := s.categoryRepository.FindCategoryByID(categoryID)
 	if err != nil {
 		if err == ErrCategoryNotFound {
 			return nil, ErrCategoryNotFound
@@ -75,4 +77,3 @@ func (s *CategoryService) ListCategories() ([]*Category, error) {
 
 	return categories, nil
 }
-
