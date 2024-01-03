@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"menu-service/internal/config"
+	"microservices/services/internal/config"
 )
 
 func Connect(cfg *config.Database) (*sqlx.DB, error) {
