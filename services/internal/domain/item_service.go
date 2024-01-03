@@ -1,27 +1,28 @@
 package domain
 
+import "github.com/pkg/errors"
+
 var (
-	ErrItemNotFOund 	= errors.New("Item not found")
-	ErrItemIsNull 		= &ValidationError{"Item can not be null"}
-	ErrItemIdINvalid 	= &ValidationError{"Invalid item Id"}
+	ErrItemNotFOund  = errors.New("Item not found")
+	ErrItemIsNull    = &ValidationError{"Item can not be null"}
+	ErrItemIdINvalid = &ValidationError{"Invalid item Id"}
 )
 
 type ItemService struct {
-	itemRepository ItemRepository
+	itemRepository     ItemRepository
 	categoryRepository CategoryRepository
 }
 
 func NewItemService(itemRepository ItemRepository, categoryRepository CategoryRepository) *ItemService {
-	return &ItemService {
-		itemRepository: 	itemRepository,
-		categoryRepository: categoryRepository
+	return &ItemService{
+		itemRepository:     itemRepository,
+		categoryRepository: categoryRepository,
 	}
 }
 
-
 func (s *ItemService) Create(item *Item) error {
 	if item == nil {
-		return ErrCategoryIsNull
+		return ErrItemIsNull
 	}
 
 	if err := s.itemRepository.CreateItem(item); err != nil {
@@ -29,7 +30,7 @@ func (s *ItemService) Create(item *Item) error {
 	}
 
 	for i, c := range item.Categories {
-		category, err := s.CategoryRepository.Get(c.Id)
+		category, err := s.categoryRepository.Get(c.Id)
 		if err != nil {
 			return errros.Wrapf(err, "Unable to add new item to category")
 		}
@@ -57,7 +58,7 @@ func (s *ItemService) Update(item *Item) error {
 	return nil
 }
 
-func (s *ItemService) Delete(itemId int ) error {
+func (s *ItemService) Delete(itemId int) error {
 	if itemId <= 0 {
 		return ErrItemIdINvalid
 	}
@@ -72,7 +73,7 @@ func (s *ItemService) Delete(itemId int ) error {
 	return nil
 }
 
-func (s *ItemService) Get (itemId int) (*Item, error) {
+func (s *ItemService) Get(itemId int) (*Item, error) {
 	if itemId <= 0 {
 		return nil, ErrItemIdINvalid
 	}
