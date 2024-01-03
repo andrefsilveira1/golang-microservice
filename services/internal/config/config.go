@@ -6,10 +6,9 @@ import (
 	"github.com/sherifabdlnaby/configuro"
 )
 
-
 type Config struct {
 	Database *Database `validate:"required"`
-	Server struct {
+	Server   struct {
 		HTTP *ServerHTTP `validate:"required"`
 		GRPC *ServerGRPC `validate:"required"`
 	} `validate:"required"`
@@ -17,18 +16,17 @@ type Config struct {
 
 type Database struct {
 	Driver   string `validate:"required"`
-	Host 	 string `validate:"required"`
-	Port 	 int	`validate:"required"`
+	Host     string `validate:"required"`
+	Port     int    `validate:"required"`
 	Username string `validate:"required"`
 	Password string `validate:"required"`
 	Database string `validate:"required"`
-
 }
 
-type ServerHTTP struct  {
-	Host	  string `validate:"required"`
-	Port 	  int `validate:"required"`
-	UserHTTPS bool 
+type ServerHTTP struct {
+	Host      string `validate:"required"`
+	Port      int    `validate:"required"`
+	UserHTTPS bool
 	CertPath  string
 }
 
@@ -44,8 +42,8 @@ func NewConfig(configPath string) (*Config, error) {
 
 	loader, err := configuro.NewConfig(
 		configuro.WithLoadFromConfigFile(configPath, false),
-		configuro.WithLoadFroEnvVars("APP")
-	)
+		configuro.WithLoadFroEnvVars("APP"))
+
 	if err != nil {
 		return nil, err
 	}
@@ -62,4 +60,3 @@ func NewConfig(configPath string) (*Config, error) {
 
 	return config, nil
 }
-
