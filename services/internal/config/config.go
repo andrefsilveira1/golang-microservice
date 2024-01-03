@@ -42,7 +42,7 @@ func NewConfig(configPath string) (*Config, error) {
 
 	loader, err := configuro.NewConfig(
 		configuro.WithLoadFromConfigFile(configPath, false),
-		configuro.WithLoadFroEnvVars("APP"))
+		configuro.WithLoadFromEnvVars("APP"))
 
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func NewConfig(configPath string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = loader.validate(config)
+	err = loader.Validate(config)
 	if err != nil {
 		return nil, err
 	}
