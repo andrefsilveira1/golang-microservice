@@ -1,5 +1,3 @@
-// internal/database/postgres/database_test.go
-
 package postgres
 
 import (
