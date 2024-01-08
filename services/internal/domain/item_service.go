@@ -30,9 +30,9 @@ func (s *ItemService) Create(item *Item) error {
 	}
 
 	for i, c := range item.Categories {
-		category, err := s.categoryRepository.Get(c.Id)
+		category, err := s.categoryRepository.FindCategoryByID(c.Id)
 		if err != nil {
-			return errros.Wrapf(err, "Unable to add new item to category")
+			return errors.Wrapf(err, "Unable to add new item to category")
 		}
 
 		if err := s.categoryRepository.AddItem(item.Id, category.Id); err != nil {
@@ -50,9 +50,9 @@ func (s *ItemService) Update(item *Item) error {
 		return ErrItemIsNull
 	}
 
-	err := s.itemRepository.Update(item)
+	err := s.itemRepository.UpdateItem(item)
 	if err != nil {
-		return errros.Wrap(err, "Unable to update item")
+		return errors.Wrap(err, "Unable to update item")
 	}
 
 	return nil
@@ -63,7 +63,8 @@ func (s *ItemService) Delete(itemId int) error {
 		return ErrItemIdINvalid
 	}
 
-	err := s.itemRepository.Delete(itemId)
+	uintId := uint(itemId)
+	err := s.itemRepository.DeleteItem(uintId)
 	if err != nil {
 		if errors.Is(err, ErrItemNotFOund) {
 			return ErrItemNotFOund
@@ -78,7 +79,8 @@ func (s *ItemService) Get(itemId int) (*Item, error) {
 		return nil, ErrItemIdINvalid
 	}
 
-	item, err := s.ItemRepository.Get(itemId)
+	uintId := uint(itemId)
+	item, err := s.itemRepository.FindItemById(uintId)
 	if err != nil {
 		if errors.Is(err, ErrItemNotFOund) {
 			return nil, ErrItemNotFOund
@@ -89,7 +91,7 @@ func (s *ItemService) Get(itemId int) (*Item, error) {
 }
 
 func (s *ItemService) List() ([]*Item, error) {
-	items, err := s.itemRepository.List()
+	items, err := s.itemRepository.ListItems()
 	if err != nil {
 		return nil, errors.Wrap(err, "Error to list items")
 	}
