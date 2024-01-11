@@ -1,19 +1,24 @@
 package rest
 
-import "microservices/services/internal/domain"
+import (
+	"microservices/services/internal/domain"
+	"microservices/services/internal/transport/rest/endpoints"
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
 
 type CategoryHandler struct {
 	categoryService *domain.CategoryService
 }
 
-
 func NewCategoryHandler(categoryService *domain.CategoryService) *CategoryHandler {
-	return &CategoryHandler {
-		categoryService: categoryService
+	return &CategoryHandler{
+		categoryService: categoryService,
 	}
 }
 
-func (h *CategoryHandler) Register (router *mux.Router) {
+func (h *CategoryHandler) Register(router *mux.Router) {
 	listCategoryEndpoint := endpoints.MakeListCategoryEndpoint(h.categoryService)
 	findCategoryEndpoint := endpoints.MakeFindCategoryEndpoint(h.categoryService)
 

@@ -1,5 +1,3 @@
-// internal/transport/rest/category_handler_test.go
-
 package rest
 
 import (
@@ -9,25 +7,24 @@ import (
 	"microservices/services/internal/domain"
 
 	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestCategoryHandler_Routes(t *testing.T) {
-	mockCategoryService := &domain.CategoryService{}
+func TestItemHandler_Routes(t *testing.T) {
+	mockItemService := &domain.ItemService{}
 
 	router := mux.NewRouter()
-	categoryHandler := NewCategoryHandler(mockCategoryService)
-	categoryHandler.Register(router)
+	itemHandler := NewItemHandler(mockItemService)
+	itemHandler.Register(router)
 
 	expectedRoutes := []struct {
 		method string
 		path   string
 	}{
-		{http.MethodGet, "/categories"},
-		{http.MethodGet, "/categories/{id}"},
-		{http.MethodPost, "/categories"},
-		{http.MethodPut, "/categories/{id}"},
-		{http.MethodDelete, "/categories/{id}"},
+		{http.MethodGet, "/items"},
+		{http.MethodGet, "/items/{id}"},
+		{http.MethodPost, "/items"},
+		{http.MethodPut, "/items/{id}"},
+		{http.MethodDelete, "/items/{id}"},
 	}
 
 	registeredRoutes := make(map[string]bool)
@@ -36,12 +33,12 @@ func TestCategoryHandler_Routes(t *testing.T) {
 		if methods, _ := route.GetMethods(); methods != nil {
 			pathTemplate, err := route.GetPathTemplate()
 			if err != nil {
-				return err
+				t.Fatalf("Failed to get path template: %v", err)
 			}
 
 			methods, err := route.GetMethods()
 			if err != nil {
-				return err
+				t.Fatalf("Failed to get methods: %v", err)
 			}
 
 			for _, method := range methods {
@@ -53,15 +50,17 @@ func TestCategoryHandler_Routes(t *testing.T) {
 	}
 
 	err := router.Walk(callback)
-	assert.Nil(t, err, "Unexpected error while walking through the router")
+	if err != nil {
+		t.Fatalf("An unexpected error happened while walking through the router: %v", err)
+	}
 
-	for _, r := range expectedRoutes {
-		route := r
+	for _, route := range expectedRoutes {
 		t.Run(route.path, func(t *testing.T) {
-			t.Parallel()
 			expectedRouteKey := route.method + " " + route.path
 
-			assert.True(t, registeredRoutes[expectedRouteKey], "Expected route %v is not registered", expectedRouteKey)
+			if _, ok := registeredRoutes[expectedRouteKey]; !ok {
+				t.Errorf("Expected route %v is not registered", expectedRouteKey)
+			}
 		})
 	}
 }
