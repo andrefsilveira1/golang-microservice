@@ -20,7 +20,7 @@ func NewCategoryHandler(categoryService *domain.CategoryService) *CategoryHandle
 
 func (h *CategoryHandler) Register(router *mux.Router) {
 	listCategoryEndpoint := endpoints.MakeListCategoryEndpoint(h.categoryService)
-	findCategoryEndpoint := endpoints.MakeFindCategoryEndpoint(h.categoryService)
+	findCategoryEndpoint := endpoints.MakeGetCategoryEndpoint(h.categoryService)
 
 	router.HandleFunc("/categories", listCategoryEndpoint).Methods(http.MethodGet)
 	router.HandleFunc("/categories/{id}", findCategoryEndpoint).Methods(http.MethodGet)

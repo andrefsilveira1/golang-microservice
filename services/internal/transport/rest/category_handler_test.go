@@ -1,5 +1,3 @@
-// internal/transport/rest/category_handler_test.go
-
 package rest
 
 import (

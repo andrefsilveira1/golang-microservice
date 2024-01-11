@@ -13,7 +13,7 @@ type ItemHandler struct {
 	itemService *domain.ItemService
 }
 
-func NewItemHandler(itemService *domain.itemService) *ItemHandler {
+func NewItemHandler(itemService *domain.ItemService) *ItemHandler {
 	return &ItemHandler{
 		itemService: itemService,
 	}
@@ -21,7 +21,7 @@ func NewItemHandler(itemService *domain.itemService) *ItemHandler {
 
 func (h *ItemHandler) Register(router *mux.Router) {
 	listItemEndpoint := endpoints.MakeListItemEndpoint(h.itemService)
-	findItemEndpoint := endpoints.MakeFindItemEndpoint(h.itemService)
+	findItemEndpoint := endpoints.MakeGetItemEndpoint(h.itemService)
 
 	router.HandleFunc("/items", listItemEndpoint).Methods(http.MethodGet)
 	router.HandleFunc("/items/{id}", findItemEndpoint).Methods(http.MethodGet)
