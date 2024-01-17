@@ -21,5 +21,5 @@ func main() {
 	log.Printf("starting HTTP server at '%s'\n", addr)
 	http.ListenAndServe(addr, router)
 
-	log.Println("service shutdown")
+	log.Println("Service shutdown")
 }
