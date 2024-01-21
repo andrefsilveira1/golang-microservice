@@ -9,9 +9,9 @@ import (
 
 func main() {
 	log.Println("Service starting")
-	cfg := config.Config{}
+	cfg := &config.ServerHTTP{Host: "localhost", Port: 8080}
 	router := mux.NewRouter().StrictSlash(true)
-	server, err := rest.NewServer(cfg.ServerHTTP, router)
+	server, err := rest.NewServer(cfg, router)
 
 	if err != nil {
 		log.Fatalf("Error on server: %+v", err)
