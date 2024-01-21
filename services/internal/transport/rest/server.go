@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"microservices/services/internal/config"
 	"net/http"
 )
@@ -48,4 +49,15 @@ func (s *Server) Start() error {
 	}
 
 	return nil
+}
+
+func (s *Server) Stop(ctx context.Context) {
+	log.Println("HTTP Server going down...")
+	err := s.Server.Shutdown(ctx)
+	if err != nil {
+		log.Printf("HTTP Server shutdown failed: %v \n", err)
+		return
+	}
+
+	log.Println("HTTP Server Off")
 }
