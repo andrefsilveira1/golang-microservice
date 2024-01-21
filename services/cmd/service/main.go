@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"microservices/services/internal/config"
 	"os"
@@ -15,7 +16,11 @@ import (
 
 func main() {
 	log.Println("Service starting")
-	cfg := &config.ServerHTTP{Host: "localhost", Port: 8080}
+
+	var configPath string
+	flag.StringVar(&configPath, "config", "", "...")
+	flag.Parse()
+	cfg := loadConfig(configPath)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -26,10 +31,11 @@ func main() {
 	defer cancel()
 
 	g, ctx := errgroup.WithContext(ctx)
+
 	var restServer *rest.Server
 	g.Go(func() (err error) {
 		router := mux.NewRouter().StrictSlash(true)
-		restServer, err = rest.NewServer(cfg, router)
+		restServer, err = rest.NewServer(cfg.Server.HTTP, router)
 		if err != nil {
 			return err
 		}
@@ -38,6 +44,7 @@ func main() {
 	})
 
 	log.Println("Service started")
+
 	select {
 	case <-interrupt:
 		break
@@ -55,6 +62,7 @@ func main() {
 	}
 
 	err := g.Wait()
+
 	if err != nil {
 		log.Printf("Server shutdown returned an error")
 		defer os.Exit(2)
@@ -78,4 +86,21 @@ func main() {
 	// addr := ":8080"
 	// log.Printf("starting HTTP server at '%s'\n", addr)
 	// http.ListenAndServe(addr, router)
+}
+
+func loadConfig(path string) *config.Config {
+	if path == "" {
+		cfgPath = os.Getenv("APP_CONFIG_PATH")
+		if cfgPath == "" {
+			cfgPath = "./config.yaml"
+		}
+	}
+
+	cfg, err := config.NewConfig(path)
+	if err != nil {
+		log.Printf("Configuration error: %v", err)
+		os.Exit(-1)
+	}
+
+	return cfg
 }
