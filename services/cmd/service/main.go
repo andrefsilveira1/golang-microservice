@@ -1,25 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
+	"microservices/services/internal/config"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	log.Println("service starting")
+	log.Println("Service starting")
+	cfg := config.Config{}
+	router := mux.NewRouter().StrictSlash(true)
+	server, err := rest.NewServer(cfg.ServerHTTP, router)
 
-	router := mux.NewRouter()
+	if err != nil {
+		log.Fatalf("Error on server: %+v", err)
+	}
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "It is working!")
-	})
+	server.Start()
+	log.Println("Server shutdown")
+	// router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 	fmt.Fprintln(w, "It is working!")
+	// })
 
-	addr := ":8080"
-	log.Printf("starting HTTP server at '%s'\n", addr)
-	http.ListenAndServe(addr, router)
-
-	log.Println("Service shutdown")
+	// addr := ":8080"
+	// log.Printf("starting HTTP server at '%s'\n", addr)
+	// http.ListenAndServe(addr, router)
 }
