@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -20,7 +21,9 @@ func main() {
 	var configPath string
 	flag.StringVar(&configPath, "config", "", "...")
 	flag.Parse()
+
 	cfg := loadConfig(configPath)
+	loadDatabase(cfg.Database)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -103,4 +106,14 @@ func loadConfig(path string) *config.Config {
 	}
 
 	return cfg
+}
+
+func loadDatabase(cfg *config.Database) *sqlx.DB {
+	db, err := database.Connect(cfg)
+	if err != nil {
+		log.Printf("Database error: %v", err)
+		os.Exit(-1)
+	}
+
+	return db
 }
