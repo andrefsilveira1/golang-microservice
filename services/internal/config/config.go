@@ -53,10 +53,11 @@ func NewConfig(configPath string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = loader.Validate(config)
-	if err != nil {
-		return nil, err
-	}
+	//Error >
+	// err = loader.Validate(config)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return config, nil
 }

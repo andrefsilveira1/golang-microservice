@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"microservices/services/internal/config"
+	database "microservices/services/internal/database/postgres"
 	"microservices/services/internal/domain"
 	repository "microservices/services/internal/repository/postgres"
 	"microservices/services/internal/transport/rest"
@@ -24,7 +26,7 @@ func main() {
 	var configPath string
 	flag.StringVar(&configPath, "config", "", "...")
 	flag.Parse()
-
+	fmt.Println("Got here 1")
 	cfg := loadConfig(configPath)
 	db := loadDatabase(cfg.Database)
 
@@ -128,6 +130,7 @@ func loadDatabase(cfg *config.Database) *sqlx.DB {
 		log.Printf("Database error: %v", err)
 		os.Exit(-1)
 	}
+	fmt.Println("database loaded")
 
 	return db
 }
