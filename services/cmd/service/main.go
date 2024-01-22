@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"microservices/services/internal/config"
+	"microservices/services/internal/domain"
 	"os"
 	"os/signal"
 	"syscall"
@@ -29,6 +30,9 @@ func main() {
 	itemRepository := repository.NewItemRepository(db)
 	categoryRepository := repository.NewCategoryRepository(db)
 
+	itemService := domain.NewItemService(itemRepository, categoryRepository)
+	categoryService := domain.NewCategoryService(categoryRepository)
+
 	// Shutdown
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -43,6 +47,9 @@ func main() {
 	var restServer *rest.Server
 	g.Go(func() (err error) {
 		router := mux.NewRouter().StrictSlash(true)
+
+		rest.NewItemHandler(itemService).Register(router)
+		rest.NewCategoryHandler(categoryService).Register(router)
 		restServer, err = rest.NewServer(cfg.Server.HTTP, router)
 		if err != nil {
 			return err
