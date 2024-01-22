@@ -24,10 +24,10 @@ type Database struct {
 }
 
 type ServerHTTP struct {
-	Host      string `validate:"required"`
-	Port      int    `validate:"required"`
-	UserHTTPS bool
-	CertPath  string
+	Host     string `validate:"required"`
+	Port     int    `validate:"required"`
+	UseHTTPS bool
+	CertPath string
 }
 
 type ServerGRPC struct {

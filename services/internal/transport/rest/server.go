@@ -2,30 +2,36 @@ package rest
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"microservices/services/internal/config"
 	"net/http"
+	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
 	*http.Server
 	Config *config.ServerHTTP
 }
-func NewServer(config *config.ServerHTTP, router *mux.Router) *Server {
+
+func NewServer(config *config.ServerHTTP, router *mux.Router) (*Server, error) {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Server Working!")
 	}).Methods(http.MethodGet)
 
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
-	return &Server {
-		Server: &http.Server {
-			Addr: addr,
-			Handler: router,
+	return &Server{
+		Server: &http.Server{
+			Addr:         addr,
+			Handler:      router,
 			WriteTimeout: time.Second * 15,
-			ReadTimeout: time.Second * 15,
-			IdleTimeout: time.Second * 60
+			ReadTimeout:  time.Second * 15,
+			IdleTimeout:  time.Second * 60,
 		},
-		Config: config
-	}
+		Config: config,
+	}, nil
 }
 
 func (s *Server) Start() error {
@@ -33,7 +39,7 @@ func (s *Server) Start() error {
 	log.Printf("HTTP server starting at: '%s: %d \n' ", s.Config.Host, s.Config.Port)
 	if s.Config.UseHTTPS {
 		log.Println("SSL certificate Enabled")
-		path := s.Config.CerPath
+		path := s.Config.CertPath
 		err = s.Server.ListenAndServeTLS(
 			fmt.Sprintf("%s /server.crt", path),
 			fmt.Sprintf("%s /server.key", path),

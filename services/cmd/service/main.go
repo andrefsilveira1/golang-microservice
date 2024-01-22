@@ -7,6 +7,7 @@ import (
 	"microservices/services/internal/config"
 	"microservices/services/internal/domain"
 	repository "microservices/services/internal/repository/postgres"
+	"microservices/services/internal/transport/rest"
 	"os"
 	"os/signal"
 	"syscall"
@@ -106,9 +107,9 @@ func main() {
 
 func loadConfig(path string) *config.Config {
 	if path == "" {
-		cfgPath = os.Getenv("APP_CONFIG_PATH")
-		if cfgPath == "" {
-			cfgPath = "./config.yaml"
+		path = os.Getenv("APP_CONFIG_PATH")
+		if path == "" {
+			path = "./config.yaml"
 		}
 	}
 
