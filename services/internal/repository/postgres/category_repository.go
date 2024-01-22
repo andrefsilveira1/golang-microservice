@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"microservices/services/internal/domain"
@@ -10,11 +11,14 @@ import (
 )
 
 const (
-	createCategory = "create category"
-	deleteCategory = "delete category by id"
-	getCategory    = "get category by id"
-	listCategory   = "list category"
-	updateCategory = "update category by id"
+	createCategory    = "create category"
+	deleteCategory    = "delete category by id"
+	getCategory       = "get category by id"
+	listCategory      = "list category"
+	updateCategory    = "update category by id"
+	addItem           = "add item to category"
+	removeItem        = "remove item from category"
+	getItemCategories = "get item categories"
 )
 
 type CategoryRepository struct {
@@ -29,6 +33,8 @@ func queriesCategory() map[string]string {
 		getCategory:    `SELECT * FROM categories WHERE id = $1`,
 		listCategory:   `SELECT * FROM categories WHERE deleted_at IS NULL BY name ASC`,
 		updateCategory: `UPDATE categories SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+		addItem:        `INSERT INTO item_categories (item_id, category_id) VALUES (:item_id, :category_id)`,
+		removeItem:     `DELETE FROM item_categories WHERE item_id = :item_id AND category_id = :category_id`,
 	}
 }
 
@@ -65,7 +71,7 @@ func (r *CategoryRepository) statement(query string) (*sqlx.Stmt, error) {
 	return stmt, nil
 }
 
-func (r *CategoryRepository) Create(category *domain.Category) error {
+func (r *CategoryRepository) CreateCategory(category *domain.Category) error {
 	stmt, err := r.statement(createCategory)
 	if err != nil {
 		return err
@@ -81,7 +87,7 @@ func (r *CategoryRepository) Create(category *domain.Category) error {
 	return nil
 }
 
-func (r *CategoryRepository) Update(category *domain.Category) error {
+func (r *CategoryRepository) UpdateCategory(category *domain.Category) error {
 	stmt, err := r.statement(updateCategory)
 	if err != nil {
 		return err
@@ -106,7 +112,7 @@ func (r *CategoryRepository) Update(category *domain.Category) error {
 	return nil
 }
 
-func (r *CategoryRepository) Delete(categoryId int) error {
+func (r *CategoryRepository) DeleteCategory(categoryId uint) error {
 	stmt, err := r.statement(deleteCategory)
 	if err != nil {
 		return err
@@ -118,7 +124,7 @@ func (r *CategoryRepository) Delete(categoryId int) error {
 	return nil
 }
 
-func (r *CategoryRepository) Get(categoryId int) (*domain.Category, error) {
+func (r *CategoryRepository) FindCategoryByID(categoryId uint) (*domain.Category, error) {
 	stmt, err := r.statement(getCategory)
 	if err != nil {
 		return nil, err
@@ -133,7 +139,7 @@ func (r *CategoryRepository) Get(categoryId int) (*domain.Category, error) {
 
 }
 
-func (r *CategoryRepository) List() ([]*domain.Category, error) {
+func (r *CategoryRepository) ListCategories() ([]*domain.Category, error) {
 	stmt, err := r.statement(listCategory)
 	if err != nil {
 		return nil, err
@@ -145,4 +151,22 @@ func (r *CategoryRepository) List() ([]*domain.Category, error) {
 	}
 
 	return categories, nil
+}
+
+func (r *CategoryRepository) AddItem(itemID uint, categoryID uint) error {
+	stmt, err := r.statement(addItem)
+	if err != nil {
+		return err
+	}
+
+	params := []interface{}{
+		itemID,
+		categoryID,
+	}
+
+	if _, err := stmt.ExecContext(context.Background(), params); err != nil {
+		return fmt.Errorf("error adding item '%d' from to category '%d'", itemID, categoryID)
+	}
+
+	return nil
 }

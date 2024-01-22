@@ -66,7 +66,7 @@ func (r *ItemRepository) statement(query string) (*sqlx.Stmt, error) {
 	return stmt, nil
 }
 
-func (r *ItemRepository) Create(item *domain.Item) error {
+func (r *ItemRepository) CreateItem(item *domain.Item) error {
 	stmt, err := r.statement(createItem)
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (r *ItemRepository) Create(item *domain.Item) error {
 	return nil
 }
 
-func (r *ItemRepository) Update(item *domain.Item) error {
+func (r *ItemRepository) UpdateItem(item *domain.Item) error {
 	stmt, err := r.statement(updateItem)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (r *ItemRepository) Update(item *domain.Item) error {
 	return nil
 }
 
-func (r *ItemRepository) Delete(itemId int) error {
+func (r *ItemRepository) DeleteItem(itemId uint) error {
 	stmt, err := r.statement(deleteItem)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func (r *ItemRepository) Delete(itemId int) error {
 	return nil
 }
 
-func (r *ItemRepository) Get(itemId int) (*domain.Item, error) {
+func (r *ItemRepository) FindItemById(itemId uint) (*domain.Item, error) {
 	stmt, err := r.statement(getItem)
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func (r *ItemRepository) Get(itemId int) (*domain.Item, error) {
 	return item, nil
 }
 
-func (r *ItemRepository) List() ([]*domain.Item, error) {
+func (r *ItemRepository) ListItems() ([]*domain.Item, error) {
 	stmt, err := r.statement(listItem)
 	if err != nil {
 		return nil, err

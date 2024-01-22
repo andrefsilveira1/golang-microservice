@@ -25,7 +25,7 @@ func main() {
 	flag.Parse()
 
 	cfg := loadConfig(configPath)
-	loadDatabase(cfg.Database)
+	db := loadDatabase(cfg.Database)
 
 	// Repositories
 	itemRepository := repository.NewItemRepository(db)
