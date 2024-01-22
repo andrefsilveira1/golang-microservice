@@ -87,7 +87,7 @@ func (r *CategoryRepository) Update(category *domain.Category) error {
 		return err
 	}
 
-	category.updated_at = time.Now()
+	category.UpdatedAt = time.Now()
 
 	params := []interface{}{
 		category.Name,

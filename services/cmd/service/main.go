@@ -6,6 +6,7 @@ import (
 	"log"
 	"microservices/services/internal/config"
 	"microservices/services/internal/domain"
+	repository "microservices/services/internal/repository/postgres"
 	"os"
 	"os/signal"
 	"syscall"

@@ -72,7 +72,7 @@ func (r *ItemRepository) Create(item *domain.Item) error {
 		return err
 	}
 
-	if err := stmt.Get(item, item.name, item.description, item.price); err != nil {
+	if err := stmt.Get(item, item.Name, item.Description, item.Price); err != nil {
 		return fmt.Errorf("Error while creating new item: %v", err)
 	}
 
@@ -85,7 +85,7 @@ func (r *ItemRepository) Update(item *domain.Item) error {
 		return err
 	}
 
-	item.updated_at = time.Now()
+	item.UpdatedAt = time.Now()
 
 	params := []interface{}{
 		item.Name,
