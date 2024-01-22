@@ -3,8 +3,13 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"microservices/services/internal/config"
+	database "microservices/services/internal/database/postgres"
+	"microservices/services/internal/domain"
+	repository "microservices/services/internal/repository/postgres"
+	"microservices/services/internal/transport/rest"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,10 +26,18 @@ func main() {
 	var configPath string
 	flag.StringVar(&configPath, "config", "", "...")
 	flag.Parse()
-
+	fmt.Println("Got here 1")
 	cfg := loadConfig(configPath)
-	loadDatabase(cfg.Database)
+	db := loadDatabase(cfg.Database)
 
+	// Repositories
+	itemRepository := repository.NewItemRepository(db)
+	categoryRepository := repository.NewCategoryRepository(db)
+
+	itemService := domain.NewItemService(itemRepository, categoryRepository)
+	categoryService := domain.NewCategoryService(categoryRepository)
+
+	// Shutdown
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(interrupt)
@@ -38,6 +51,9 @@ func main() {
 	var restServer *rest.Server
 	g.Go(func() (err error) {
 		router := mux.NewRouter().StrictSlash(true)
+
+		rest.NewItemHandler(itemService).Register(router)
+		rest.NewCategoryHandler(categoryService).Register(router)
 		restServer, err = rest.NewServer(cfg.Server.HTTP, router)
 		if err != nil {
 			return err
@@ -93,9 +109,9 @@ func main() {
 
 func loadConfig(path string) *config.Config {
 	if path == "" {
-		cfgPath = os.Getenv("APP_CONFIG_PATH")
-		if cfgPath == "" {
-			cfgPath = "./config.yaml"
+		path = os.Getenv("APP_CONFIG_PATH")
+		if path == "" {
+			path = "./config.yaml"
 		}
 	}
 
@@ -114,6 +130,7 @@ func loadDatabase(cfg *config.Database) *sqlx.DB {
 		log.Printf("Database error: %v", err)
 		os.Exit(-1)
 	}
+	fmt.Println("database loaded")
 
 	return db
 }
