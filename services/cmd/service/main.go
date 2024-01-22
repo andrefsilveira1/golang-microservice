@@ -25,6 +25,11 @@ func main() {
 	cfg := loadConfig(configPath)
 	loadDatabase(cfg.Database)
 
+	// Repositories
+	itemRepository := repository.NewItemRepository(db)
+	categoryRepository := repository.NewCategoryRepository(db)
+
+	// Shutdown
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(interrupt)
